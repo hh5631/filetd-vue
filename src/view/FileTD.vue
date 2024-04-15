@@ -4,7 +4,7 @@
    <el-upload
     class="upload-demo"
     drag
-    action="http://192.168.100.31:8095/upload"
+    action="http://192.168.100.32:8095/upload"
     multiple
     :on-success="onSuccess"
     :show-file-list="false"
@@ -69,8 +69,9 @@
       import { h, ref } from 'vue'
       import { UploadFilled } from '@element-plus/icons-vue'
       import {Check,Delete,Edit,Message,Search,Star,Download,Promotion} from '@element-plus/icons-vue'
-      import { uname } from '../../config.js';
+      import { socketIp, uname } from '../../config.js'
       import { ElMessage,ElNotification } from 'element-plus'
+      import {serverIp} from '../../config.js'
 
 
 
@@ -103,7 +104,7 @@
       
 //获取所有文件     
       const showAll =async ()=>{
-        const response2 = await axios.get('http://192.168.100.31:8095/showAll');
+        const response2 = await axios.get(serverIp+'/showAll');
                 response2.data.forEach(element => {
                         console.log(element.fileName+element.filePath);
                 })
@@ -133,7 +134,7 @@
 //下载和删除文件
       const handleDownload =async (row)=>{
         try {
-        const response = await axios.get('http://192.168.100.31:8095/download', {
+        const response = await axios.get(serverIp+'/download', {
             params: {
                 filepath: row.filePath
             },
@@ -153,7 +154,7 @@
       }
       const handleDelete =async (row)=>{
             try {
-            const response = await axios.get('http://192.168.100.31:8095/delete', {
+            const response = await axios.get(serverIp+'/delete', {
                 params: {
                     fileName: row.fileName
                 },
@@ -188,7 +189,7 @@
 //获取所有聊天记录
       const showAllMessage =async ()=>{
 
-        const response = await axios.get('http://192.168.100.31:8080/getAllMessage');
+        const response = await axios.get(socketIp+'/getAllMessage');
                 text.value='';
             response.data.forEach(element => {
                 text.value+=element.name+' :    '+element.message+'\n';

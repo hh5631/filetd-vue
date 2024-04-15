@@ -12,20 +12,19 @@
     import axios from 'axios'
     import { ref } from 'vue'
     import { useRouter } from 'vue-router'
+    import { uname,passwd,serverIp } from '../../config';
     
         const router = useRouter() // 在 setup 中获取 router 实例
         const login_btn = ref('返回')
         const register_btn =  ref('注册')
-        const uname = ref('')
-        const passwd = ref('')
-    
+
         const login =()=>{
           router.push('/login')
         }
         const register =()=>{
           register_btn.value='注册中'
           console.log(uname,passwd)
-          axios.get('http://192.168.100.31:8095/register',{
+          axios.get(serverIp+'/register',{
             params:{
               username: uname.value,
               password: passwd.value
@@ -33,8 +32,10 @@
           }
          ).then((res) => {
           alert(res.data)
+          register_btn.value='注册'
         }).catch((err) => {
           alert(err)
+          register_btn.value='注册'
         })
         }
      
