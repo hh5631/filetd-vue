@@ -64,141 +64,140 @@
       
 
 
-      <script setup>
-      import axios from 'axios';
-      import { h, ref } from 'vue'
-      import { UploadFilled } from '@element-plus/icons-vue'
-      import {Check,Delete,Edit,Message,Search,Star,Download,Promotion} from '@element-plus/icons-vue'
-      import { socketIp, uname } from '../../config.js'
-      import { ElMessage,ElNotification } from 'element-plus'
-      import {serverIp} from '../../config.js'
+<script setup lang="ts">
+import axios from 'axios';
+import { h, ref } from 'vue'
+import { UploadFilled } from '@element-plus/icons-vue'
+import {Check,Delete,Edit,Message,Search,Star,Download,Promotion} from '@element-plus/icons-vue'
+import { ElMessage,ElNotification } from 'element-plus'
+import {serverIp,uname} from '../../config.js'
 
 
 
-      const tableData = ref([])
-      const input = ref('')
-      const text = ref('')
+const tableData = ref([])
+const input = ref('')
+const text = ref('')
 
-      const socket = new WebSocket('ws://192.168.100.31:8080/websocket/'+uname.value);
-      socket.onopen = function(event) {
-        console.log('WebSocket连接已建立');
+const socket = new WebSocket('ws://192.168.100.32:8095/websocket/'+uname.value);
+socket.onopen = function(event) {
+  console.log('WebSocket连接已建立');
 
-        showAllMessage();
+  showAllMessage();
 
-      };
-  // 当收到服务器消息时触发
-      socket.onmessage = function(event) {
-          console.log('收到服务器消息：', event.data);
-          // 更新消息列表
-          text.value += event.data+'\n';
-      };
-      socket.onclose = function(event) {
-          console.log('WebSocket连接已关闭');
-      };
+};
+// 当收到服务器消息时触发
+socket.onmessage = function(event) {
+    console.log('收到服务器消息：', event.data);
+    // 更新消息列表
+    text.value += event.data+'\n';
+};
+socket.onclose = function(event) {
+    console.log('WebSocket连接已关闭');
+};
 
-      socket.onerror = function(event) {
-          console.log('WebSocket发生了错误');
-      };
-    
-    
-      
+socket.onerror = function(event) {
+    console.log('WebSocket发生了错误');
+};
+
+
+
 //获取所有文件     
-      const showAll =async ()=>{
-        const response2 = await axios.get(serverIp+'/showAll');
-                response2.data.forEach(element => {
-                        console.log(element.fileName+element.filePath);
-                })
-                tableData.value = response2.data
-        
-      }
-      
+const showAll =async ()=>{
+  const response2 = await axios.get(serverIp+'/showAll');
+          response2.data.forEach(element => {
+                  console.log(element.fileName+element.filePath);
+          })
+          tableData.value = response2.data
+  
+}
+
 
 //文件上传的事件
-      const onSuccess =async ()=>{
-        ElMessage.success('上传成功!');
-        showAll();
-      }
-      const onProcess =async ()=>{
-        ElMessage.success('文件传输中...');
-      }
-      const onError =async ()=>{
-        ElMessage.error('文件传输失败!');
-      }
-      const onExceed =async ()=>{
-        ElMessage.error('文件过大或数量超出限制!');
-      }
+const onSuccess =async ()=>{
+  ElMessage.success('上传成功!');
+  showAll();
+}
+const onProcess =async ()=>{
+  ElMessage.success('文件传输中...');
+}
+const onError =async ()=>{
+  ElMessage.error('文件传输失败!');
+}
+const onExceed =async ()=>{
+  ElMessage.error('文件过大或数量超出限制!');
+}
 
 
 
 
 //下载和删除文件
-      const handleDownload =async (row)=>{
-        try {
-        const response = await axios.get(serverIp+'/download', {
-            params: {
-                filepath: row.filePath
-            },
-        });
-        console.log('aaaaa++'+response.data);
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        console.log('bbbb'+url);
-      // 创建一个链接元素
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', row.fileName);  // 设置下载文件的名称
-        // 触发点击链接操作
-        link.click();
-      } catch (error) {
-        console.log('下载文件时出现错误：', error);
-      }
-      }
-      const handleDelete =async (row)=>{
-            try {
-            const response = await axios.get(serverIp+'/delete', {
-                params: {
-                    fileName: row.fileName
-                },
-            });
-            ElMessage.success(response.data);
-            showAll();
-          } catch (error) {
-            ElMessage.error('删除文件时出现错误：', error);
-          }
-      }
+const handleDownload =async (row)=>{
+  try {
+  const response = await axios.get(serverIp+'/download', {
+      params: {
+          filepath: row.filePath
+      },
+  });
+  console.log('aaaaa++'+response.data);
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  console.log('bbbb'+url);
+// 创建一个链接元素
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', row.fileName);  // 设置下载文件的名称
+  // 触发点击链接操作
+  link.click();
+} catch (error) {
+  console.log('下载文件时出现错误：', error);
+}
+}
+const handleDelete =async (row)=>{
+      try {
+      const response = await axios.get(serverIp+'/delete', {
+          params: {
+              fileName: row.fileName
+          },
+      });
+      ElMessage.success(response.data);
+      showAll();
+    } catch (error) {
+      ElMessage.error('删除文件时出现错误：', error);
+    }
+}
 
 //发送按钮点击事件
-      const sendMessage =async ()=>{
-        if(uname.value==''){
-          ElNotification({
-            title: '提示',
-            message: '使用该功能需要先<a href="/login">登录</a>',
-            type: 'warning',
-            dangerouslyUseHTMLString: true
-          })
-          return
-        }
-        if(input.value==''){
-          ElMessage.warning('发送内容不能为空')
-          return
-        }
-        socket.send(input.value);  
-        input.value='';   
-      }
+const sendMessage =async ()=>{
+  if(uname.value==''){
+    ElNotification({
+      title: '提示',
+      message: '使用该功能需要先<a href="/login">登录</a>',
+      type: 'warning',
+      dangerouslyUseHTMLString: true
+    })
+    return
+  }
+  if(input.value==''){
+    ElMessage.warning('发送内容不能为空')
+    return
+  }
+  socket.send(input.value);  
+  input.value='';   
+}
 
 
 //获取所有聊天记录
-      const showAllMessage =async ()=>{
+const showAllMessage =async ()=>{
 
-        const response = await axios.get(socketIp+'/getAllMessage');
-                text.value='';
-            response.data.forEach(element => {
-                text.value+=element.name+' :    '+element.message+'\n';
-            })
+  const response = await axios.get(socketIp+'/getAllMessage');
+          text.value='';
+      response.data.forEach(element => {
+          text.value+=element.name+' :    '+element.message+'\n';
+      })
 
-      }
+}
 
-      showAll();
-      </script>
+showAll();
+</script>
       
       <style>
       .text{
